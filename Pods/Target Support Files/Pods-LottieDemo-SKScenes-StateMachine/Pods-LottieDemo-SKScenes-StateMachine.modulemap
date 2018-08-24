@@ -1,0 +1,6 @@
+framework module Pods_LottieDemo_SKScenes_StateMachine {
+  umbrella header "Pods-LottieDemo-SKScenes-StateMachine-umbrella.h"
+
+  export *
+  module * { export * }
+}

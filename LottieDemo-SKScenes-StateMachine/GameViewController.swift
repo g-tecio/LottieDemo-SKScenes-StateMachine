@@ -7,52 +7,70 @@
 //
 
 import UIKit
+import Lottie
 import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
+	
+	// Scene State Machine
+	var sceneStateMachine: GKStateMachine!
+	
+	var lottieAnimation: LOTAnimationView!
+	var gameSKView: SKView!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // Load 'GameScene.sks' as a GKScene. This provides gameplay related content
-        // including entities and graphs.
-        if let scene = GKScene(fileNamed: "GameScene") {
-            
-            // Get the SKScene from the loaded GKScene
-            if let sceneNode = scene.rootNode as! GameScene? {
-                
-                // Copy gameplay related content over to the scene
-                sceneNode.entities = scene.entities
-                sceneNode.graphs = scene.graphs
-                
-                // Set the scale mode to scale to fit the window
-                sceneNode.scaleMode = .aspectFill
-                
-                // Present the scene
-                if let view = self.view as! SKView? {
-                    view.presentScene(sceneNode)
-                    
-                    view.ignoresSiblingOrder = true
-                    
-                    view.showsFPS = true
-                    view.showsNodeCount = true
-                }
-            }
-        }
-    }
+	// Scenes
+	var launchScene: LaunchScene!
+	var menuScene: MenuScene!
+	var gameScene: GameScene!
+	var configScene: ConfigScene!
+	var giftScene: GiftScene!
+	var recordsScene: RecordsScene!
 
-    override var shouldAutorotate: Bool {
-        return true
-    }
-
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
-        } else {
-            return .all
-        }
-    }
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		// Backgound Color of the SuperView
+		view.backgroundColor = UIColor.black
+		
+		// Setup animaitonView
+		lottieAnimation = LOTAnimationView()
+		lottieAnimation.contentMode = .scaleAspectFit
+		lottieAnimation.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
+		lottieAnimation.center = self.view.center
+		lottieAnimation.backgroundColor = UIColor.clear
+		view.addSubview(lottieAnimation)
+		
+		// Setup SKView
+		gameSKView = SKView.init(frame: self.view.bounds)
+		gameSKView.contentMode = .scaleToFill
+		gameSKView.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
+		gameSKView.center = self.view.center
+		gameSKView.allowsTransparency = true
+		view.addSubview(gameSKView)
+	
+		// Performance monitoring of SpriteKit
+		gameSKView.ignoresSiblingOrder = true
+		gameSKView.showsFPS = true
+		gameSKView.showsNodeCount = true
+		
+		// Scenes Setup
+		launchScene = LaunchScene.init(gameVC: self)
+		menuScene = MenuScene.init(gameVC: self)
+		gameScene = GameScene.init(gameVC: self)
+		configScene = ConfigScene.init(gameVC: self)
+		giftScene = GiftScene.init(gameVC: self)
+		recordsScene = RecordsScene.init(gameVC: self)
+		
+		/// Creates SceneStateMachine and adds states, then enters GameSceneState
+		sceneStateMachine = GKStateMachine(states: [	LaunchState(gameVC: self),
+														MenuState(gameVC: self),
+														GameState(gameVC: self),
+														ConfigState(gameVC: self),
+														GiftState(gameVC: self),
+														RecordsState(gameVC: self)	] )
+		sceneStateMachine.enter(LaunchState.self)
+	}
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
